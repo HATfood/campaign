@@ -1040,15 +1040,16 @@ async function consultAI(task) {
     aiResponseDiv.innerHTML = '';
     aiResponseDiv.classList.add('loading');
     
-    const apiKey = "AIzaSyBS9Zsr72aXCElnl7oxILj7kc32fyW9cfk"; // Your provided API Key
+    // Your API key
+    const apiKey = "AIzaSyBS9Zsr72aXCElnl7oxILj7kc32fyW9cfk"; 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
 
     const prompt = `
-        من مدیر کمپین برند "بلوط" هستم و روی تسک زیر کار می‌کنم.
-        عنوان تسک: "${task.title}"
-        جزئیات تسک: "${task.details}"
+        I am the campaign manager for the "Baloot" brand, working on the following task.
+        Task Title: "${task.title}"
+        Task Details: "${task.details}"
         
-        لطفاً به زبان فارسی، چند پیشنهاد خلاقانه و عملی برای اجرای بهتر این تسک ارائه بده. چالش‌های احتمالی را شناسایی کن و برای هر کدام یک راهکار پیشنهاد بده.
+        Please provide, in Persian (فارسی), several creative and practical suggestions to better execute this task. Identify potential challenges and propose a solution for each. Format your response using Markdown for better readability (e.g., use **bold headings** and *bullet points*).
     `;
 
     try {
@@ -1066,23 +1067,32 @@ async function consultAI(task) {
             })
         });
 
-        if (!response.ok) {
-            // This will likely happen with a fake key
-            throw new Error(`API Error: ${response.statusText}`);
-        }
-
+        // We need to read the response body to get the error details
         const data = await response.json();
+
+        if (!response.ok) {
+            // Log the detailed error from Google's response
+            console.error("API Error Response from Google:", data);
+            // Throw an error with the specific message from the API
+            throw new Error(data.error?.message || `Request failed with status ${response.status}`);
+        }
+        
+        // Using an external library to convert Markdown to HTML for nice formatting
+        const { marked } = await import('https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js');
         const aiText = data.candidates[0].content.parts[0].text;
-        aiResponseDiv.innerHTML = aiText.replace(/\n/g, '<br>');
+        aiResponseDiv.innerHTML = marked(aiText);
 
     } catch (error) {
-        console.error("AI Error:", error);
+        console.error("Full AI Error Details:", error);
         aiResponseDiv.innerHTML = `
-            <p><strong>خطا در ارتباط با دستیار AI.</strong></p>
-            <p>این خطا ممکن است به دلیل نامعتبر بودن API Key یا مشکلات شبکه باشد. لطفاً از معتبر بودن کلید <code>${apiKey}</code> اطمینان حاصل کنید.</p>
-            <p><strong>یک نمونه پاسخ شبیه‌سازی شده:</strong></p>
-            <p><strong>چالش احتمالی:</strong> عدم استقبال کاربران از کمپین.</p>
-            <p><strong>راهکار:</strong> برای شروع، با چند اینفلوئنسر کوچک و معتبر همکاری کنید تا یخ اولیه کمپین شکسته شود. همچنین، جایزه‌ای جذاب برای خلاقانه‌ترین محتوا در نظر بگیرید تا انگیزه مشارکت افزایش یابد.</p>
+            <p style="color: red; font-weight: bold;">Error connecting to the AI assistant!</p>
+            <p><strong>Specific Error:</strong> ${error.message}</p>
+            <p><strong>Troubleshooting:</strong></p>
+            <ol>
+                <li><strong>Most Likely:</strong> Ensure the <strong>"Generative Language API"</strong> is ENABLED in your Google Cloud project. <a href="https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com" target="_blank">Click here to check</a>.</li>
+                <li>Verify your API Key restrictions allow your GitHub domain (<code>hatfood.github.io/*</code>).</li>
+                <li>Check the browser's Console (F12) for more technical details.</li>
+            </ol>
         `;
     } finally {
         aiResponseDiv.classList.remove('loading');
