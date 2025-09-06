@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد استراتژیک برند بلوط</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --primary-color: #4A90E2;
+            --secondary-color: #50E3C2;
+            --text-color: #333;
+            --text-light: #555;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --done-color: #28a745;
+            --inprogress-color: #ffc107;
+            --todo-color: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-attachment: fixed;
+            color: var(--text-color);
+            line-height: 1.7;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Glassmorphism Effect */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .brand-logo i {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+
+        .brand-logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .nav {
+            width: 100%;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link i {
+            margin-left: 15px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .main-content::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        .view {
+            display: none;
+        }
+        .view.active {
+            display: block;
+        }
+
+        .view-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        .view-header h2 {
+            font-size: 28px;
+        }
+        .view-header p {
+            color: var(--text-light);
+        }
+
+        /* To-Do List View */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filters select, .filters input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.7);
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .filters button {
+            padding: 10px 20px;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filters button:hover {
+            background-color: #3a7bc8;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .task-card {
+            padding: 20px;
+            cursor: pointer;
+        }
+
+        .task-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .task-card .week-badge {
+            background: var(--primary-color);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .task-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .task-status.todo { background: var(--todo-color); }
+        .task-status.inprogress { background: var(--inprogress-color); }
+        .task-status.done { background: var(--done-color); }
+
+
+        .task-card h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .task-card p.details {
+            font-size: 14px;
+            color: var(--text-light);
+            max-height: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Timeline View */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 20px;
+            height: 100%;
+            width: 4px;
+            background: var(--secondary-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 40px;
+            padding-right: 60px;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            right: 12px;
+            top: 5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--secondary-color);
+            z-index: 1;
+        }
+
+        .timeline-content {
+            padding: 20px;
+            position: relative;
+        }
+        .timeline-content h3 {
+            color: var(--primary-color);
+        }
+
+        /* Reports View */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .report-card {
+            padding: 25px;
+        }
+
+        .report-card h3 {
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+        }
+
+        .report-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .report-analysis p {
+            margin-bottom: 10px;
+        }
+        .report-analysis strong {
+            color: var(--primary-color);
+        }
+        
+        /* Modal */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            width: 90%;
+            max-width: 700px;
+            padding: 30px;
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 10px;
+        }
+
+        .modal-body h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        .modal-body label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        .modal-body input, .modal-body textarea, .modal-body select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.8);
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        .modal-body textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-ai {
+            background-color: #8E44AD;
+            color: white;
+            margin-top: 15px;
+        }
+        .btn-ai i {
+            margin-left: 8px;
+        }
+
+        .ai-response {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.05);
+            border-radius: 8px;
+            border-right: 4px solid var(--secondary-color);
+        }
+        .ai-response.loading::before {
+            content: "در حال پردازش...";
+            font-style: italic;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <aside class="sidebar glass">
+            <div class="brand-logo">
+                <i class="fa-solid fa-tree"></i>
+                <h1>برند بلوط</h1>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link active" data-view="todo"><i class="fa-solid fa-list-check"></i>لیست وظایف</a>
+                <a href="#" class="nav-link" data-view="timeline"><i class="fa-solid fa-chart-gantt"></i>نمای تایم‌لاین</a>
+                <a href="#" class="nav-link" data-view="reports"><i class="fa-solid fa-chart-pie"></i>گزارش‌ها</a>
+            </nav>
+        </aside>
+
+        <main class="main-content glass">
+            <!-- To-Do List View -->
+            <section id="todo-view" class="view active">
+                <div class="view-header">
+                    <h2>لیست وظایف کمپین (۱۴۴ هفته)</h2>
+                    <p>برند بلوط - واحد مارکتینگ.</p>
+                </div>
+                <div class="filters">
+                    <select id="year-filter">
+                        <option value="all">همه سال‌ها</option>
+                        <option value="1">سال اول</option>
+                        <option value="2">سال دوم</option>
+                        <option value="3">سال سوم</option>
+                    </select>
+                    <select id="month-filter">
+                        <option value="all">همه ماه‌ها</option>
+                        <!-- Options will be generated by JS -->
+                    </select>
+                    <select id="status-filter">
+                        <option value="all">همه وضعیت‌ها</option>
+                        <option value="todo">انجام نشده</option>
+                        <option value="inprogress">در حال انجام</option>
+                        <option value="done">انجام شده</option>
+                    </select>
+                    <input type="text" id="search-input" placeholder="جستجو در عناوین...">
+                    <button id="add-task-btn"><i class="fa-solid fa-plus"></i> افزودن تسک جدید</button>
+                </div>
+                <div id="task-grid" class="task-grid">
+                    <!-- Task cards will be generated by JS -->
+                </div>
+            </section>
+
+            <!-- Timeline View -->
+            <section id="timeline-view" class="view">
+                <div class="view-header">
+                    <h2>تایم‌لاین ۳ ساله کمپین</h2>
+                    <p>نمای کلی فازهای ۱۲ گانه پروژه برند بلوط.</p>
+                </div>
+                <div id="timeline-container" class="timeline">
+                    <!-- Timeline items will be generated by JS -->
+                </div>
+            </section>
+
+            <!-- Reports View -->
+            <section id="reports-view" class="view">
+                <div class="view-header">
+                    <h2>گزارش‌های فصلی و تحلیل</h2>
+                    <p>پیشرفت پروژه را در هر فاز با نمودار و تحلیل استراتژیک مشاهده کنید.</p>
+                </div>
+                <div id="report-grid" class="report-grid">
+                    <!-- Report cards will be generated by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Task Detail/Edit Modal -->
+    <div id="task-modal" class="modal">
+        <div class="modal-content glass">
+            <span class="modal-close">&times;</span>
+            <div id="modal-body" class="modal-body">
+                <!-- Modal content will be generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Data Structure: All 144 tasks from your text
+const initialCampaignData = [
+    // Phase 1
+    {id: 1, week: 1, phase: 1, title: 'نهایی‌سازی طراحی هویت بصری برند و بسته‌بندی', details: 'طراحی بسته‌بندی به‌صورت داستان‌محور (Storytelling Packaging) انجام می‌شود و مثلاً کاراکتر «بلوطی» (سنجاب نمادین برند) از طریق بسته‌ها QR و بنر سایت هایی مثل فودپرس و اکالا معرفی می‌گردد.', category: '1- هویت برند و بسته‌بندی جذاب', role: 'تیم مرکزی', status: 'todo'},
+    {id: 2, week: 2, phase: 1, title: 'راه‌اندازی نسخه اولیه وب‌سایت رسمی بلوط', details: 'ایجاد وب‌سایت شامل معرفی برند، محصولات و بخش آموزشی. ایجاد بخش ویژه‌ای در سایت برای حلقه‌های مختلف زنجیره ارزش جهت ارتباط بهتر در آینده.', category: '2- پلتفرم دیجیتال و وب‌سایت', role: 'تیم مرکزی', status: 'todo'},
+    {id: 3, week: 3, phase: 1, title: 'ایجاد حساب‌های کاربری برند در شبکه‌های اجتماعی', details: 'ایجاد حساب در اینستاگرام، لینکدین، توییتر و ... و انتشار اولین پست‌های معرفی داستان برند بلوط و مزایای آن. هدف آشنایی مخاطبان با لحن و شخصیت برند (شخصیت «بلوطی») است.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'تیم مرکزی', status: 'todo'},
+    {id: 4, week: 4, phase: 1, title: 'اعلام لانچ رسمی برند و ارسال پکیج به اینفلوئنسرها', details: 'اعلام لانچ از طریق بیانیه خبری و پوشش رسانه‌ای. روایت داستان فرهنگی پیرامون احیای یک نوشیدنی سنتی. ارسال پکیج معرفی به اینفلوئنسرها و رسانه‌های منتخب.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'رسانه‌ها', status: 'todo'},
+    {id: 5, week: 5, phase: 1, title: 'شروع کمپین دیجیتال «یک روز بدون چای»', details: 'کمپین «یک روز بدون چای»: کاربر: تصور کن! یک روز بدون چای؟ پیام کوتاه با هشتگ #یک_روز_بدون_چای. برند: انیمیشن فان از دردسرهای بدون چای.بهترین پیام‌ها می‌شن سناریوی قسمت بعدی.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 6, week: 6, phase: 1, title: 'گسترش موج مردمی کمپین «یک روز بدون چای»', details: 'تمرکز روی بازنشر بهترین پیام‌های کاربران. برگزاری چالش تعاملی و رأی‌گیری. ساخت انیمیشن کوتاه طنز از بهترین سناریوها و اجرای تبلیغات پولی هدفمند (PPC).', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'رسانه‌ها', status: 'todo'},
+    {id: 7, week: 7, phase: 1, title: 'توزیع هوشمندانه پک نمونه در شبکه فروش', details: 'ارسال پک‌های نمونه به فروشندگان و مغازه‌داران منتخب. هر پک شامل: محصولات تست + بروشور آموزشی + QR کد برای بازخورد سریع و عضویت در پرتال وبسایت.', category: '6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری', role: 'فروشندگان و خرده‌فروشان', status: 'todo'},
+    {id: 8, week: 8, phase: 1, title: 'راه‌اندازی سیستم معرف مصرف‌کننده (Referral)', details: 'سیستم معرف سبک و کم‌هزینه. هر مشتری کد معرف می‌گیره. پاداش: امتیاز باشگاه یا شانس قرعه‌کشی ماهانه. پیام: «دوستت رو بلوطی کن، امتیاز بگیر و شانست رو بیشتر کن!»', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 9, week: 9, phase: 1, title: 'شناسایی و جذب اولین نمایندگان/توزیع‌کنندگان استانی', details: 'مذاکره با توزیع‌کنندگان محلی برای پایه‌گذاری شبکه فروش منطقه‌ای. ارائه امتیاز انحصاری موقت و انگیزه مالی (حاشیه سود بالا برای اولین سفارش‌ها).', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'تیم منطقه‌ای', status: 'todo'},
+    {id: 10, week: 10, phase: 1, title: 'تهیه و توزیع کیت‌های آموزشی برای نمایندگان', details: 'کیت شامل بروشور، کاتالوگ، دستورالعمل‌های فروش و نمونه محصول. برگزاری جلسه آموزشی آنلاین جهت توجیه اولیه نیروهای فروش.', category: '9- برندسازی داخلی و آموزش شبکه فروش', role: 'ویزیتور فروش', status: 'todo'},
+    {id: 11, week: 11, phase: 1, title: 'طراحی و ارسال اقلام تبلیغات در نقطه‌فروش (POS)', details: 'آماده‌سازی و توزیع استندهای رومیزی، پوستر، استیکر، و جعبه ویترین لوکس برای فروشگاه‌ها جهت جلب توجه مشتریان.', category: '6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری', role: 'خرده‌فروش', status: 'todo'},
+    {id: 12, week: 12, phase: 1, title: 'ارزیابی نتایج مرحله پایلوت و بازنگری برنامه', details: 'تحلیل داده‌های فروش اولیه، بازخورد مشتریان و عملکرد نمایندگان. تهیه گزارش آموخته‌ها و تنظیم اولویت‌بندی فاز بعدی.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'تیم مرکزی', status: 'todo'},
+    // Phase 2
+    {id: 13, week: 13, phase: 2, title: 'برگزاری رویداد رونمایی رسمی در استان‌های هدف', details: 'ترتیب یک رویداد رسانه‌ای/حضوری کوچک در مراکز استان‌های کلیدی. ارائه خلاقانه و تعاملی داستان برند و امکان تست محصول. پوشش خبری در مطبوعات و رسانه‌های آنلاین.', category: '6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری', role: 'مدیریت مرکزی', status: 'todo'},
+    {id: 14, week: 14, phase: 2, title: 'معرفی محصول جدید یا تنوع در بسته‌بندی', details: 'عرضه‌ی یک بسته ترکیبی یا محصول جدید (مانند نوشیدنی بلوط با خواص سلامت‌محور ویژه) برای تنوع‌بخشی به سبد محصول و جذب سلایق متفاوت.', category: '1- هویت برند و بسته‌بندی جذاب', role: 'تیم مرکزی', status: 'todo'},
+    {id: 15, week: 15, phase: 2, title: 'فعال‌سازی مشتریان وفادار در شهرهای اصلی', details: 'شناسایی مشتریان وفادار بر اساس خرید یا معرفی. ارائه کد تخفیف ویژه محلی و امتیاز دوبرابر برای تشویق آنها به ترویج طبیعی برند در جمع‌های خود.', category: '5- توسعه محلی و منطقه‌ای', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 16, week: 16, phase: 2, title: 'بومی‌سازی کمپین‌ها متناسب با فرهنگ هر استان', details: 'تولید محتواهای تبلیغاتی با گویش‌ها و نمادهای محلی. همکاری با هنرمندان بومی برای خلق محتوای مرتبط تا برند رنگ‌وبوی هر منطقه را به خود بگیرد.', category: '5- توسعه محلی و منطقه‌ای', role: 'رسانه‌ها', status: 'todo'},
+    {id: 17, week: 17, phase: 2, title: 'اجرای اولین کمپین مسئولیت اجتماعی (CSR)', details: 'راه‌اندازی کمپینی با شعار «به ازای هر ۱۰۰۰ کارتن فروخته‌شده، یک نهال بلوط کاشته می‌شود». ایجاد تصویر مثبت و انگیزه برای شبکه فروش. پوشش خبری حرکت.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'رسانه‌ها/CSR', status: 'todo'},
+    {id: 18, week: 18, phase: 2, title: 'آغاز سری محتوایی «سبک زندگی سالم با بلوط»', details: 'تولید و انتشار منظم مقالات وبلاگی و پست‌های شبکه‌های اجتماعی پیرامون فواید نوشیدنی بلوط و سبک زندگی سالم برای گره زدن برند با مفهوم سلامت و تندرستی.', category: '8- محتوای نوآورانه', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 19, week: 19, phase: 2, title: 'راه‌اندازی خبرنامه ایمیلی «بَلوگرام»', details: 'ارسال اولین ایمیل خبرنامه شامل مطالب آموزشی، اخبار برند و تخفیفات برای حفظ ارتباط مستمر با مشتریان.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 20, week: 20, phase: 2, title: 'پیاده‌سازی طرح «سود شبکه‌ای فروشگاه»', details: 'طراحی سازوکاری که هر فروشگاه خرده‌فروشی بتواند مشتری جدیدی را با کد مخصوص معرفی کند و درصدی از فروش او را به عنوان پاداش دریافت نماید.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'خرده‌فروش', status: 'todo'},
+    {id: 21, week: 21, phase: 2, title: 'راه‌اندازی داشبورد آنلاین پایش شبکه فروش', details: 'طراحی داشبورد مدیریتی برای نمایش زنده عملکرد همه حلقه‌ها. رصد پیشروی شبکه، شناسایی حلقه‌های ضعیف و حمایت از آنها.', category: '2- پلتفرم دیجیتال و وب‌سایت', role: 'مدیریت مرکزی/تیم منطقه‌ای', status: 'todo'},
+    {id: 22, week: 22, phase: 2, title: 'برگزاری جشن تقدیر «سفیر برتر بلوط»', details: 'طراحی مراسم دوره‌ای برای اهدای لقب افتخاری «سفیر بلوط» و جوایز غیرمالی به بالاترین فروشنده یا موثرترین نماینده هر استان برای تقویت رقابت سالم و انگیزه.', category: '9- برندسازی داخلی و آموزش شبکه فروش', role: 'تیم منطقه‌ای و نمایندگان', status: 'todo'},
+    {id: 23, week: 23, phase: 2, title: 'اجرای چالش UGC «لحظه‌های بلوطی من»', details: 'دعوت از کاربران برای اشتراک‌گذاری عکس یا ویدیو از لحظه نوشیدن بلوط. بازنشر بهترین محتواها و اهدای جوایز برای وایرال شدن نام بلوط توسط مصرف‌کنندگان.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 24, week: 24, phase: 2, title: 'گسترش جغرافیایی به خوشه‌های بازار بعدی', details: 'آغاز ورود به استان‌ها یا شهرهای جدید بر اساس اولویت‌ها. تکرار الگوی لانچ استانی شامل انتخاب سفیران، رویداد معرفی و کمپین‌های محلی.', category: '5- توسعه محلی و منطقه‌ای', role: 'تیم منطقه‌ای', status: 'todo'},
+    // Phases 3-12 would follow the same structure... 
+    // For brevity in this example, I'll stop here, but the full implementation should include all 144 tasks.
+    // The user provided all 144 tasks, so I must add them all.
+    // ...Continuing to add all tasks
+    // Phase 3
+    {id: 25, week: 25, phase: 3, title: 'عرضه و رونمایی از اپلیکیشن موبایل بلوط', details: 'اپلیکیشن به عنوان بستر یکپارچه باشگاه مشتریان و آموزش نیروها. امکان عضویت، مشاهده امتیازات، دریافت کوپن و دسترسی به محتوای آموزشی.', category: '7- نوآوری‌های دیجیتال و فناوری', role: 'مصرف‌کننده/ویزیتور', status: 'todo'},
+    {id: 26, week: 26, phase: 3, title: 'اجرای باشگاه مشتریان چندسطحی', details: 'راه‌اندازی سیستم امتیازدهی با سطح‌های برنزی، نقره‌ای و طلایی. تعریف مزایای هر سطح برای ایجاد انگیزه.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 27, week: 27, phase: 3, title: 'صدور اولین سری «Baloot Club Card»', details: 'اهدای کارت باشگاه توسط ویزیتورها برای ایجاد حس عضویت در یک جامعه ویژه و استفاده از مزایا.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'ویزیتور/مصرف‌کننده', status: 'todo'},
+    {id: 28, week: 28, phase: 3, title: 'بازی‌سازی (Gamification) در تعاملات مشتریان', details: 'طراحی چالش امتیازی (معرفی دوست، اشتراک‌گذاری محتوا) با کمپین «امتیاز بلوطی جمع کن، هدیه بگیر».', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 29, week: 29, phase: 3, title: 'برگزاری رویداد حضوری «فستیوال لحظات بلوطی»', details: 'گردهمایی تفریحی-تبلیغاتی با مسابقه، موزیک، تست طعم و پوشش رسانه‌ای برای افزایش آگاهی از برند.', category: '6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری', role: 'مصرف‌کننده/رسانه‌ها', status: 'todo'},
+    {id: 30, week: 30, phase: 3, title: 'حضور در یک نمایشگاه یا رویداد تجاری', details: 'شرکت در نمایشگاه صنایع غذایی برای معرفی بلوط به خریداران عمده و سنجش علاقه شرکای تجاری بزرگ‌تر.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'مدیریت مرکزی', status: 'todo'},
+    {id: 31, week: 31, phase: 3, title: 'انتشار سری ویدئوهای آموزشی/کوتاه تبلیغاتی', details: 'آماده‌سازی ویدیوهای کوتاه ۳۰ ثانیه‌ای با محوریت «داستان یک لحظه بلوطی» یا نمایش خلاقانه طرز تهیه نوشیدنی.', category: '8- محتوای نوآورانه', role: 'رسانه‌ها', status: 'todo'},
+    {id: 32, week: 32, phase: 3, title: 'همکاری با پادکست‌ها یا برنامه‌های رادیویی', details: 'اسپانسر شدن یک قسمت از پادکست محبوب در حوزه تغذیه یا ورزش برای نفوذ در مخاطبان جدید و افزایش اعتبار.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'رسانه‌ها', status: 'todo'},
+    {id: 33, week: 33, phase: 3, title: 'شروع برنامه Co-Branding با فروشگاه‌ها', details: 'اجرای کمپین تبلیغاتی یا تخفیفی مشترک با فروشگاه‌های منتخب برای افزایش فروش و آشنایی مردم با برند.', category: '5- توسعه محلی و منطقه‌ای', role: 'خرده‌فروش', status: 'todo'},
+    {id: 34, week: 34, phase: 3, title: 'انتشار کتابچه دیجیتال «تاریخچه نوشیدنی‌های گرم در ایران»', details: 'انتشار PDF تعاملی برای جایگاه‌دهی بلوط به عنوان ادامه‌دهنده سنت نوشیدنی‌های اصیل ایرانی.', category: '8- محتوای نوآورانه', role: 'رسانه‌ها/مصرف‌کننده', status: 'todo'},
+    {id: 35, week: 35, phase: 3, title: 'اجرای برنامه آموزش مربی (Train the Trainer)', details: 'انتخاب نمایندگان توانمند و آموزش مهارت‌های رهبری شبکه به آن‌ها برای توزیع بار آموزش و نظارت.', category: '9- برندسازی داخلی و آموزش شبکه فروش', role: 'تیم منطقه‌ای/نمایندگان', status: 'todo'},
+    {id: 36, week: 36, phase: 3, title: 'تسری برنامه بازاریابی شبکه‌ای به استان‌های جدید', details: 'گسترش شبکه به مناطق جدید با الگوی آزمایش‌شده قبلی و با کمک رهبران آموزش‌دیده.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'تیم منطقه‌ای', status: 'todo'},
+    
+    // Phase 4
+    {id: 37, week: 37, phase: 4, title: 'راه‌اندازی فیلتر واقعیت افزوده (AR) اینستاگرام', details: 'طراحی فیلتر جذاب (لیوان بلوط روی سر یا انیمیشن سنجاب) برای ایجاد موجی از محتوای خودانگیخته و سرگرم‌کننده.', category: '7- نوآوری‌های دیجیتال و فناوری', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 38, week: 38, phase: 4, title: 'عرضه یک محصول نسخه محدود (Limited Edition)', details: 'طراحی بسته‌بندی ویژه برای یک مناسبت خاص (شب یلدا) جهت ایجاد حس کمیابی و اشتیاق.', category: '1- هویت برند و بسته‌بندی جذاب', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 39, week: 39, phase: 4, title: 'تبلیغات درون‌برنامه‌ای در یک بازی موبایلی', details: 'نمایش بنر یا ویدئوی کوتاه تبلیغاتی بلوط در یک بازی آنلاین پربازدید برای قرار گرفتن در معرض دید نسل جوان.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'رسانه‌ها', status: 'todo'},
+    {id: 40, week: 40, phase: 4, title: 'طراحی و انتشار Press Kit دیجیتال', details: 'ایجاد کیت شامل تصاویر باکیفیت، داستان برند و آمارهای کلیدی برای تسهیل کار خبرنگاران.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'رسانه‌ها', status: 'todo'},
+    {id: 41, week: 41, phase: 4, title: 'برگزاری یک مسابقه ملی خلاقانه', details: 'فراخوان عمومی مسابقه عکاسی یا داستان‌نویسی با موضوع بلوط برای مطرح شدن برند در سطح ملی و ایجاد پیوند عاطفی.', category: '3- بازاریابی محتوایی و شبکه‌های اجتماعی', role: 'مصرف‌کننده/رسانه‌ها', status: 'todo'},
+    {id: 42, week: 42, phase: 4, title: 'تقویت برنامه سفیران شهرهای مختلف', details: 'ارزیابی عملکرد و افزودن سفیران جدید. ایجاد تالار گفت‌وگوی آنلاین ویژه سفیران برای تبادل تجربه‌ها.', category: '5- توسعه محلی و منطقه‌ای', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 43, week: 43, phase: 4, title: 'اجرای ورکشاپ‌ها در دانشگاه‌ها و کافه‌ها', details: 'برگزاری کارگاه‌هایی درباره کارآفرینی یا تغذیه سالم با حضور و تست محصول بلوط برای جا افتادن برند نزد نسل جدید.', category: '6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری', role: 'مصرف‌کننده', status: 'todo'},
+    {id: 44, week: 44, phase: 4, title: 'اجرای کامل ساختار پاداش چندسطحی', details: 'فعال‌سازی رسمی سیستم کمیسیون چندلایه برای ویزیتورها و نمایندگان جهت تقویت رشد تصاعدی شبکه.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'ویزیتور/نماینده', status: 'todo'},
+    {id: 45, week: 45, phase: 4, title: 'معرفی برنامه “Leader Bonus”', details: 'ارائه پاداش ویژه به رهبرانی که شبکه تحت مدیریت‌شان به اهداف مشخصی برسد.', category: '4- شبکه توزیع و باشگاه مشتریان', role: 'تیم منطقه‌ای', status: 'todo'},
+    {id: 46, week: 46, phase: 4, title: 'بازبینی جایگاه برند و تطبیق استراتژی', details: 'بررسی جامع جایگاه برند در ذهن مشتریان از طریق تحقیقات بازار و اصلاح جهت‌گیری در صورت نیاز.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'مدیریت مرکزی', status: 'todo'},
+    {id: 47, week: 47, phase: 4, title: 'برنامه‌ریزی اولیه برای ورود به بازارهای بین‌المللی', details: 'بررسی کشورهای بالقوه برای صادرات، شامل تحقیقات روی قوانین، ذائقه و شناسایی شرکای احتمالی.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'مدیریت مرکزی', status: 'todo'},
+    {id: 48, week: 48, phase: 4, title: 'اجرای یک کمپین بزرگ تصویری با پیام سبک زندگی', details: 'راه‌اندازی کمپین تبلیغاتی همه‌جانبه برای تأکید بر ارزش‌های برند (سلامتی، اصالت، مدرنیته) به عنوان نقطه عطف.', category: '10- چشم‌انداز آینده و توسعه بازار', role: 'مصرف‌کننده/رسانه‌ها', status: 'todo'},
+    
+    // Phase 5 to 12
+    { id: 49, week: 49, phase: 5, title: "عرضه NFTهای کلکسیونی بلوط", details: "انتشار آیتم‌های دیجیتال منحصر‌به‌فرد (NFT) برای ایجاد حس عضویت در یک باشگاه خاص برای مشتریان نسل جوان.", category: "7- نوآوری‌های دیجیتال و فناوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 50, week: 50, phase: 5, title: "گسترش حضور در فروشگاه‌های آنلاین", details: "همکاری با مارکت‌پلیس‌های مشهور (مانند دیجی‌کالا) برای فروش آنلاین محصولات در سراسر کشور.", category: "2- پلتفرم دیجیتال و وب‌سایت", role: "مصرف‌کننده", status: "todo" },
+    { id: 51, week: 51, phase: 5, title: "اجرای لیگ فروش فروشگاه‌ها", details: "رتبه‌بندی عملکرد فروش فروشگاه‌های خرده‌فروش در سطح استان و کشور و اهدای جوایز به برترین‌ها.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "خرده‌فروش", status: "todo" },
+    { id: 52, week: 52, phase: 5, title: "راه‌اندازی طرح اشتراک ماهانه محصول", details: "ارائه طرحی که مشتریان بتوانند هر ماه یک بسته محصولات متنوع بلوط درب منزل دریافت کنند با تخفیف ویژه.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 53, week: 53, phase: 5, title: "انتشار مستند کوتاه برند بلوط", details: "تکمیل و انتشار مستند ۵ تا ۱۰ دقیقه‌ای «از دانه تا حالِ خوش» در پلتفرم‌های VOD و شبکه‌های اجتماعی.", category: "8- محتوای نوآورانه", role: "رسانه‌ها", status: "todo" },
+    { id: 54, week: 54, phase: 5, title: "همکاری با متخصصان تغذیه برای تولید محتوا", details: "انتشار مقالات یا ویدئوهای مصاحبه با پزشکان تغذیه درباره خواص سلامتی بلوط برای ارتقای وجهه علمی محصول.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 55, week: 55, phase: 5, title: "اجرای برنامه سفیران سازمانی و کارمندی", details: "فعال‌تر شدن تیم مرکزی و نمایندگان در فضای آنلاین حرفه‌ای (لینکدین) برای ساخت برندینگ کارفرمایی.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "تیم مرکزی/نمایندگان", status: "todo" },
+    { id: 56, week: 56, phase: 5, title: "برگزاری نشست سالانه شبکه فروش", details: "برگزاری رویداد (مجازی یا حضوری) با حضور نمایندگان، ویزیتورها و مشتریان برای دریافت بازخورد و تقویت حس تعلق.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "همه حلقه‌ها", status: "todo" },
+    { id: 57, week: 57, phase: 5, title: "معرفی یک محصول مکمل جدید", details: "همکاری با یک برند سالم برای عرضه بیسکویت یا شیرینی سلامت در بسته‌های بلوط برای ارتقای تجربه مصرف.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مصرف‌کننده", status: "todo" },
+    { id: 58, week: 58, phase: 5, title: "اجرای کمپین CSR دوم", details: "مشارکت با یک سازمان مردم‌نهاد (NGO) در زمینه سلامت یا محیط زیست و اختصاص درصدی از فروش به آن.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 59, week: 59, phase: 5, title: "تازه‌سازی چالش وایرال در شبکه‌های اجتماعی", details: "راه‌اندازی کمپین هشتگ جدید مانند #انرژی_هرروز برای تاکید بر استفاده روزمره و مقرون‌به‌صرفه بودن محصول.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 60, week: 60, phase: 5, title: "ارزیابی پوشش بازار و برنامه‌ریزی برای پرکردن شکاف‌ها", details: "بررسی استان‌ها یا بخش‌هایی از بازار که عملکرد ضعیف‌تری داشته‌اند و تدوین نقشه راه برای تمرکز ویژه بر آن‌ها.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 61, week: 61, phase: 6, title: "تغطیه کامل بازار داخلی", details: "ورود به تمام استان‌ها و شهرهای باقیمانده و تکمیل کانال‌های توزیع مویرگی.", category: "5- توسعه محلی و منطقه‌ای", role: "تیم منطقه‌ای", status: "todo" },
+    { id: 62, week: 62, phase: 6, title: "برگزاری رویداد بزرگ تجربه بلوط", details: "برپایی Pop-up Café موقت در یک مرکز خرید مشهور برای تست رایگان محصول و جذب آخرین گروه‌های مخاطب.", category: "6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 63, week: 63, phase: 6, title: "افزودن چت‌بات هوشمند به وب‌سایت", details: "راه‌اندازی چت‌بات برای پاسخ‌گویی خودکار به سؤالات پرتکرار مشتریان و بهبود تجربه آن‌ها.", category: "7- نوآوری‌های دیجیتال و فناوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 64, week: 64, phase: 6, title: "حمایت از یک رویداد فرهنگی مرتبط", details: "اسپانسر شدن جشنواره‌ای با موضوع طبیعت یا سلامت برای افزایش اعتبار برند در قشر فرهنگی جامعه.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 65, week: 65, phase: 6, title: "اجرای پویش‌های سمپلینگ در مکان‌های پرتردد", details: "ارائه تست رایگان بلوط در مکان‌هایی مانند مترو و پارک‌ها برای آشنایی لایه‌های بیشتری از جامعه با محصول.", category: "6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 66, week: 66, phase: 6, title: "راه‌اندازی کمپین ملی «سبک زندگی سالم با بلوط»", details: "اجرای کمپین همه‌جانبه رسانه‌ای برای تشویق مردم به پذیرش تغییرات کوچک در سبک زندگی.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مصرف‌کننده/رسانه‌ها", status: "todo" },
+    { id: 67, week: 67, phase: 6, title: "ایجاد فروشگاه پاداش‌ وفاداری (Reward Shop)", details: "افزودن بخشی به اپلیکیشن که مشتریان بتوانند امتیازهای خود را خرج کرده و هدایایی دریافت کنند.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 68, week: 68, phase: 6, title: "شناسایی و تربیت رهبران جدید شبکه", details: "یافتن افراد مستعد در شبکه و آموزش آن‌ها برای رهبری بخش‌های جدید و تضمین تداوم رشد.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "تیم منطقه‌ای/نمایندگان", status: "todo" },
+    { id: 69, week: 69, phase: 6, title: "برگزاری دومین گردهمایی سالانه شبکه فروش", details: "برگزاری رویداد پرشورتر با حضور تمام حلقه‌ها برای انتقال تجربه، آموزش و تقدیر از نفرات ممتاز.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "همه حلقه‌ها", status: "todo" },
+    { id: 70, week: 70, phase: 6, title: "آغاز پایلوت صادرات محصول", details: "عرضه آزمایشی محموله کوچکی از محصولات به یک کشور همسایه برای رصد بازخورد اولیه بازار خارجی.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 71, week: 71, phase: 6, title: "ساخت و انتشار نخستین موزیک برند (Brand Jingle)", details: "تهیه یک قطعه موسیقی کوتاه و جذاب برای شکل‌دهی به هویت صوتی برند و افزایش ماندگاری آن در ذهن.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 72, week: 72, phase: 6, title: "سنجش رضایت مشتریان در مقیاس بزرگ", details: "اجرای نظرسنجی جامع کشوری برای اندازه‌گیری شاخص‌های CSAT و NPS و شناسایی فرصت‌های بهبود.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 73, week: 73, phase: 7, title: "عرضه دوباره یک نسخه محدود فصلی", details: "ارائه یک طعم یا بسته‌بندی ویژه فصلی برای حفظ هیجان بازار و تبدیل آن به یک سنت برند.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مصرف‌کننده", status: "todo" },
+    { id: 74, week: 74, phase: 7, title: "راه‌اندازی انجمن آنلاین مشتریان (Forum)", details: "ایجاد یک تالار گفتگو یا گروه رسمی برای تبادل نظر مشتریان وفادار درباره تجربیات و پیشنهادات.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 75, week: 75, phase: 7, title: "تقویت مجدد برنامه‌ی معرف‌ها", details: "اجرای طرح «معرفی کن و بلوط طلایی بگیر» با مشوق‌های جذاب‌تر برای اوج‌گیری مجدد رشد ارجاعی.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده/ویزیتور", status: "todo" },
+    { id: 76, week: 76, phase: 7, title: "اجرای کمپین ملی با تاکید بر اصالت و مدرنیته", details: "کمپین تبلیغاتی با شعار «پل بین نسل‌ها؛ با طعم بلوط» برای یادآوری ماهیت یگانه برند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده/رسانه‌ها", status: "todo" },
+    { id: 77, week: 77, phase: 7, title: "ارزیابی وضعیت صادرات و تصمیم‌گیری", details: "بررسی عملکرد پایلوت صادرات و برنامه‌ریزی برای افزایش حجم یا رفع چالش‌ها.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 78, week: 78, phase: 7, title: "انتشار داستان موفقیت حلقه‌های مختلف", details: "انتشار داستان‌های واقعی از رونق کسب‌وکار یک خرده‌فروش یا بهبود سلامت یک مشتری برای انسانی کردن برند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده/خرده‌فروش", status: "todo" },
+    { id: 79, week: 79, phase: 7, title: "راه‌اندازی برنامه منتورینگ داخلی برای ویزیتورها", details: "اتصال هر ویزیتور تازه‌کار به یک ویزیتور باتجربه به عنوان منتور برای افزایش همبستگی و جریان دانش.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "ویزیتور", status: "todo" },
+    { id: 80, week: 80, phase: 7, title: "همکاری با دانشگاه یا مرکز پژوهشی", details: "برگزاری سمینار علمی یا سفارش تحقیق دانشگاهی درباره خواص بلوط برای بالا بردن اعتبار علمی برند.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 81, week: 81, phase: 7, title: "بهینه‌سازی مجدد استراتژی محتوایی", details: "تحلیل عملکرد محتواهای گذشته و تنظیم تقویم محتوایی آینده مطابق با سلایق مخاطبان.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مدیریت مرکزی", status: "todo" },
+    { id: 82, week: 82, phase: 7, title: "برگزاری جشن تقدیر از اعضای باشگاه وفاداری", details: "برگزاری رویداد اختصاصی برای اعضای سطح بالا و اهدای هدایای ویژه برای ایجاد تعلق خاطر عمیق.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 83, week: 83, phase: 7, title: "تداوم حضور فعال در شبکه‌های اجتماعی", details: "برنامه‌ریزی برای ماه‌های آتی شبکه‌های اجتماعی جهت انتشار محتوای جذاب و بالا نگه داشتن engagement.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 84, week: 84, phase: 7, title: "طراحی کمپین بزرگ پایان سال", details: "تهیه ویدئویی از مسیر طی‌شده و قدردانی از مشتریان به عنوان مقدمه‌ای برای ورود به دوره تثبیت پایدار.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مصرف‌کننده/رسانه‌ها", status: "todo" },
+    { id: 85, week: 85, phase: 8, title: "آغاز کمپین «جنبش سبک زندگی بلوط»", details: "دعوت از مردم برای به نمایش گذاشتن تعهد خود به سبک زندگی سالم با هشتگ #سبک_زندگی_بلوط.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مصرف‌کننده", status: "todo" },
+    { id: 86, week: 86, phase: 8, title: "پیاده‌سازی ابزارهای پیشرفته تحلیل رفتار", details: "راه‌اندازی Heatmap و تست‌های A/B در وب‌سایت برای بهبودهای جزئی ولی مستمر در تجربه کاربری.", category: "2- پلتفرم دیجیتال و وب‌سایت", role: "مدیریت مرکزی", status: "todo" },
+    { id: 87, week: 87, phase: 8, title: "تأسیس یک صندوق خیریه دائمی به نام برند", details: "اختصاص درصد ثابتی از درآمد سالیانه به یک حوزه مسئولیت اجتماعی برای نهادینه کردن جایگاه برند.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها/CSR", status: "todo" },
+    { id: 88, week: 88, phase: 8, title: "به‌روزرسانی و اجرای دوره‌های آموزشی جدید", details: "آموزش همه اعضای شبکه با آخرین پیام‌ها و استانداردها برای همسویی کل سازمان با چشم‌انداز آینده.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "تیم مرکزی", status: "todo" },
+    { id: 89, week: 89, phase: 8, title: "برگزاری «جشنواره افتخارات بلوط»", details: "اهدای جوایز به افراد برجسته در هر حلقه (بهترین ویزیتور، بهترین خرده‌فروش و...)", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "همه حلقه‌ها", status: "todo" },
+    { id: 90, week: 90, phase: 8, title: "مشارکت با یک برند معتبر دیگر (Co-Branding)", details: "همکاری با یک برند دیگر برای تولید پکیج یا رویداد مشترک جهت دستیابی به مخاطبان جدید.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 91, week: 91, phase: 8, title: "بروزرسانی هویت بصری بسته‌بندی‌ها", details: "اعمال تغییرات جزئی در بسته‌بندی برای تازه نگه‌داشتن قفسه فروشگاه‌ها و نشان دادن پیشرفت برند.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مصرف‌کننده", status: "todo" },
+    { id: 92, week: 92, phase: 8, title: "مستندسازی و تدوین نهایی دانش سه‌ساله", details: "ثبت تمامی تجربیات، موفقیت‌ها و شکست‌ها در یک سند جامع (Brand Book, SOPs).", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 93, week: 93, phase: 8, title: "بین‌المللی‌سازی وب‌سایت و دارایی‌های دیجیتال", details: "راه‌اندازی نسخه انگلیسی (و شاید عربی) وب‌سایت و شبکه‌های اجتماعی بین‌المللی.", category: "2- پلتفرم دیجیتال و وب‌سایت", role: "مدیریت مرکزی", status: "todo" },
+    { id: 94, week: 94, phase: 8, title: "تقویت شبکه توزیع در عمق", details: "شناسایی شهرهایی با سرانه مصرف کمتر و تدوین برنامه ویژه برای افزایش فروش در آن مناطق.", category: "5- توسعه محلی و منطقه‌ای", role: "تیم منطقه‌ای", status: "todo" },
+    { id: 95, week: 95, phase: 8, title: "نظرسنجی جامع کلیه حلقه‌ها", details: "دریافت بازخورد نهایی از مدیران، ویزیتورها، فروشگاه‌ها و مشتریان برای برنامه‌ریزی استراتژی پس از ۳ سال.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 96, week: 96, phase: 8, title: "برگزاری مراسم اختتامیه برنامه ۳ ساله", details: "اعلام عمومی دستاوردها و برنامه‌های آینده در یک نشست خبری با پیام «پایان این برنامه، آغاز فصل جدید بلوط است».", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 97, week: 97, phase: 9, title: "معرفی یک خدمت یا محصول مکمل جدید", details: "راه‌اندازی فروش لوازم دم‌آوری اختصاصی بلوط یا ارائه پک‌های هدیه شرکتی.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مصرف‌کننده", status: "todo" },
+    { id: 98, week: 98, phase: 9, title: "ارزیابی و بهینه‌سازی مکانیزم‌های چندسطحی", details: "بررسی داده‌های شبکه و اصلاح قوانین یا مشوق‌ها برای حفظ سودآوری و انگیزه.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مدیریت مرکزی", status: "todo" },
+    { id: 99, week: 99, phase: 9, title: "انتشار گزارش‌های رسانه‌ای درباره سفر برند", details: "هماهنگی با رسانه‌ها برای انتشار گزارش ویژه «چگونه بلوط در ۳ سال تحول آفرید».", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 100, week: 100, phase: 9, title: "بهینه‌سازی زنجیره تامین و پشتیبانی", details: "بهینه‌سازی تأمین موجودی فروشگاه‌ها و استقرار سیستم سفارش آنلاین برای آن‌ها.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "خرده‌فروش", status: "todo" },
+    { id: 101, week: 101, phase: 9, title: "تعیین نقشه راه تحقیق و توسعه (R&D)", details: "اولویت‌بندی ایده‌های محصول جدید (طعم‌های جدید، بسته‌بندی دوست‌دار محیط زیست) برای آینده.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مدیریت مرکزی", status: "todo" },
+    { id: 102, week: 102, phase: 9, title: "انجام مطالعه مجدد شاخص‌های برند", details: "اندازه‌گیری مجدد میزان آگاهی از برند، تداعیات و وفاداری برای کمی‌سازی رشد حاصل شده.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 103, week: 103, phase: 9, title: "بررسی امکان راه‌اندازی کافی‌کورنرهای فیزیکی", details: "ارزیابی راه‌اندازی کافی‌کورنرهای ثابت در فروشگاه‌ها یا استقرار دستگاه‌های فروش خودکار.", category: "6-برنامه‌ریزی جهت رویدادها و تجربه‌های حضوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 104, week: 104, phase: 9, title: "اجرای آخرین کمپین بزرگ وفاداری", details: "برگزاری قرعه‌کشی یک جایزه ارزشمند بین اعضای باشگاه برای ایجاد موج هیجان پایانی.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 105, week: 105, phase: 9, title: "بهبود نهایی تجربه دیجیتال", details: "آخرین اصلاحات و باگ‌گیری‌ها روی اپلیکیشن و وب‌سایت بر اساس بازخورد کاربران.", category: "7- نوآوری‌های دیجیتال و فناوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 106, week: 106, phase: 9, title: "فعالسازی مجدد مشتریان غیرفعال", details: "ارسال کمپین ایمیل/پیامک با کد تخفیف بازگشت برای مشتریانی که مدت‌ها خرید نکرده‌اند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 107, week: 107, phase: 9, title: "تدوین برنامه جانشین‌پروری و انتقال", details: "ارزیابی نیاز به جذب نیروی جدید یا واگذاری وظایف به رهبران شبکه برای ادامه مسیر.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 108, week: 108, phase: 9, title: "اعلام دستاوردهای صادراتی", details: "انتشار خبر آغاز عرضه بلوط در بازار کشور هدف برای القای حس غرور ملی.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 109, week: 109, phase: 10, title: "برگزاری کنفرانس/وبینار سراسری دانش", details: "اشتراک‌گذاری تجربیات موفق و آمارهای کلیدی با تمام اعضای شبکه برای انتقال حس اتحاد.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "همه حلقه‌ها", status: "todo" },
+    { id: 110, week: 110, phase: 10, title: "جمع‌آوری و تدوین محتواهای ۳ ساله", details: "آرشیو تمامی دارایی‌های محتوایی و انتشار ویدیوی گلچین بهترین لحظات کمپین‌ها.", category: "8- محتوای نوآورانه", role: "مدیریت مرکزی", status: "todo" },
+    { id: 111, week: 111, phase: 10, title: "اجرای آخرین ابتکار CSR پر سروصدا", details: "تکمیل پروژه مردمی مانند کاشت «جنگل بلوط» یا اهدای محصول به کادر درمان.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" },
+    { id: 112, week: 112, phase: 10, title: "تقویت روابط با اینفلوئنسرها و شرکا", details: "ارسال بسته هدیه و نامه تشکر شخصی به تمام شرکایی که در این ۳ سال به برند کمک کرده‌اند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 113, week: 113, phase: 10, title: "پایش و بهینه‌سازی ترکیب کانال‌های فروش", details: "بررسی سهم فروش کانال‌های مختلف (فیزیکی، آنلاین) و تصمیم‌گیری برای تمرکز بیشتر بر کانال‌های موفق.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 114, week: 114, phase: 10, title: "اجرای کمپین تعطیلات پایان سال", details: "راه اندازی کمپین خرید هدیه‌های بلوط برای عزیزان با امتیاز دوبرابر برای اعضای باشگاه.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 115, week: 115, phase: 10, title: "به‌روزرسانی اپلیکیشن موبایل با ویژگی‌های جدید", details: "انتشار آخرین نسخه اپلیکیشن در چارچوب برنامه ۳ ساله با قابلیت‌های جدید درخواست شده توسط کاربران.", category: "7- نوآوری‌های دیجیتال و فناوری", role: "مصرف‌کننده", status: "todo" },
+    { id: 116, week: 116, phase: 10, title: "بروزرسانی SEO و محتوای وب‌سایت", details: "انجام بررسی جامع سئو برای کسب رتبه برتر در جستجوی گوگل برای کلیدواژه‌های مرتبط.", category: "2- پلتفرم دیجیتال و وب‌سایت", role: "مدیریت مرکزی", status: "todo" },
+    { id: 117, week: 117, phase: 10, title: "اجرای مجدد کمپین «یک روز بدون چای»", details: "برگزاری دوباره چالش معروف اولیه برای ایجاد موج نوستالژی و سنجش تغییرات.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 118, week: 118, phase: 10, title: "تهیه یک مطالعه موردی (Case Study) جامع", details: "تدوین سندی که تمام ابعاد برنامه ۳ ساله را تشریح و نتایج را تحلیل می‌کند.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی/PR", status: "todo" },
+    { id: 119, week: 119, phase: 10, title: "اهدای جوایز به اعضای باشگاه مشتریان", details: "ارسال یادبود کوچک برای اعضای قدیمی و فعال باشگاه به مناسبت ۳ سالگی برند.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 120, week: 120, phase: 10, title: "تدوین استراتژی ۳ ساله بعدی برند", details: "ترسیم نقشه راه میان‌مدت بعدی با داده‌ها و درس‌های آموخته‌شده (توسعه بین‌المللی، تنوع محصولی).", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 121, week: 121, phase: 11, title: "تاکید مجدد بر پیام «به‌صرفه و در دسترس بودن»", details: "یادآوری اقتصادی بودن محصول برای جذب مجدد مشتریانی که به دلیل قیمت به سراغ رقبا می‌روند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 122, week: 122, phase: 11, title: "اجرای کمپین «مهمان‌نوازی ایرانی با بلوط»", details: "تولید محتوا برای معرفی بلوط به عنوان یک انتخاب سالم و شیک برای پذیرایی از مهمان.", category: "8- محتوای نوآورانه", role: "مصرف‌کننده", status: "todo" },
+    { id: 123, week: 123, phase: 11, title: "اجرای طرح بهبود رضایت مشتری", details: "شناسایی مشتریان ناراضی احتمالی از طریق نظرسنجی و دلجویی از آن‌ها.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مصرف‌کننده", status: "todo" },
+    { id: 124, week: 124, phase: 11, title: "نهایی‌سازی قراردادها/مشارکت‌های استراتژیک", details: "نهایی کردن قرارداد با زنجیره‌های خرده‌فروشی بزرگ، شرکت‌های پخش یا سرمایه‌گذاران.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 125, week: 125, phase: 11, title: "انجام به‌روزرسانی جزیی برندینگ", details: "ایجاد طراوت در المان‌های هویتی (لوگو، رنگ، لحن پیام) بدون خدشه به شاکله اصلی.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مدیریت مرکزی", status: "todo" },
+    { id: 126, week: 126, phase: 11, title: "استمرار تولید محتوای آموزشی و داستانی", details: "ادامه انتشار محتوای بلاگ، ویدئو و پادکست طبق تقویم برای حفظ نقش رسانه‌ای برند.", category: "8- محتوای نوآورانه", role: "مدیریت مرکزی", status: "todo" },
+    { id: 127, week: 127, phase: 11, title: "چکاپ نهایی دارایی‌های دیجیتال", details: "اطمینان از به‌روز بودن و فعال بودن تمام صفحات وب‌سایت، لینک‌ها، و گواهی‌های امنیتی.", category: "2- پلتفرم دیجیتال و وب‌سایت", role: "مدیریت مرکزی", status: "todo" },
+    { id: 128, week: 128, phase: 11, title: "تضمین تداوم آموزش برای نیروهای جدید", details: "تدوین فرایندی برای آموزش خودکار نیروهای تازه‌وارد و اختصاص مربی به آن‌ها.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 129, week: 129, phase: 11, title: "جمع‌آوری داستان‌های مشتریان وفادار", details: "انجام مصاحبه با مشتریان بسیار وفادار برای استفاده به عنوان داستان موفقیت یا تستیمونیال.", category: "8- محتوای نوآورانه", role: "مصرف‌کننده", status: "todo" },
+    { id: 130, week: 130, phase: 11, title: "برنامه‌ریزی کمپین نوروزی سال بعد", details: "طراحی کمپین نوروز پیشِ رو برای جلوگیری از وقفه پس از پایان رسمی برنامه.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 131, week: 131, phase: 11, title: "اجرای موج آخر تبلیغات «انرژی روزمره»", details: "انتشار گسترده پیام “انرژی‌بخش هر روز شما” برای تثبیت عادت مصرف روزمره بلوط.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 132, week: 132, phase: 11, title: "تاکید رسانه‌ای بر وجه اصیل ایرانی برند", details: "بازگویی داستان اصالت ایرانی و سنتی بودن ترکیبات بلوط برای جلوگیری از سطحی‌زدگی تجاری.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "رسانه‌ها", status: "todo" },
+    { id: 133, week: 133, phase: 12, title: "ادامه ارتباط مستمر با اعضای باشگاه", details: "ادامه فعالیت‌های روتین باشگاه (خبرنامه، تخفیف) برای حفظ حس همراهی مشتریان.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 134, week: 134, phase: 12, title: "تاکید بر پیام «اولین تجربه نوشیدنی مدرن»", details: "طراحی کمپین برای هدف گرفتن مخاطبانی که تاکنون بلوط را امتحان نکرده‌اند.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 135, week: 135, phase: 12, title: "معرفی یک نوآوری یا سورپرایز نهایی", details: "رونمایی از یک طعم جدید نوآورانه یا یک سرویس جدید به عنوان آخرین اوج خلاقیت برنامه.", category: "1- هویت برند و بسته‌بندی جذاب", role: "مصرف‌کننده", status: "todo" },
+    { id: 136, week: 136, phase: 12, title: "تاکید نهایی بر ترکیب اصالت و نوآوری", details: "بازگویی داستان مسیر ۳ ساله برند برای جمع‌بندی نهایی در ذهن مخاطبان.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مصرف‌کننده", status: "todo" },
+    { id: 137, week: 137, phase: 12, title: "تحکیم پیام مقرون‌به‌صرفه بودن", details: "انتشار محتوای کاربردی که نشان می‌دهد یک لیوان بلوط انرژی معادل قهوه با هزینه کمتر دارد.", category: "3- بازاریابی محتوایی و شبکه‌های اجتماعی", role: "مصرف‌کننده", status: "todo" },
+    { id: 138, week: 138, phase: 12, title: "برجسته‌سازی دوباره اصالت ایرانی محصول", details: "تهیه ویدیوی کوتاه مستندگونه از فرآیند تهیه بلوط از جنگل‌های زاگرس تا فنجان مشتری.", category: "8- محتوای نوآورانه", role: "مصرف‌کننده", status: "todo" },
+    { id: 139, week: 139, phase: 12, title: "حفظ و نظارت بر انجمن مشتریان", details: "اطمینان از فعالیت انجمن‌های آنلاین و واگذاری مدیریت به اعضای معتبر جامعه.", category: "4- شبکه توزیع و باشگاه مشتریان", role: "مصرف‌کننده", status: "todo" },
+    { id: 140, week: 140, phase: 12, title: "تحلیل و جمع‌بندی نهایی داده‌ها", details: "تحلیل جامع پایانی روی تمام KPIهای کلیدی و ارائه نتایج به مدیریت ارشد.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "مدیریت مرکزی", status: "todo" },
+    { id: 141, week: 141, phase: 12, title: "قدردانی از تمامی اعضای شبکه", details: "ارسال نامه تشکر شخصی‌سازی‌شده و هدیه یادبود برای تک تک اعضای کلیدی شبکه.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 142, week: 142, phase: 12, title: "تحویل رسمی امور به تیم‌های دایمی", details: "انتقال رسمی دانش و وظایف از حالت «پروژه» به حالت «فرآیند ongoing».", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 143, week: 143, phase: 12, title: "آرشیوسازی و ذخیره‌سازی امن اطلاعات", details: "ذخیره تمام داده‌های خام و فایل‌های پروژه روی سرورهای مطمئن و سیستم‌های پشتیبان.", category: "9- برندسازی داخلی و آموزش شبکه فروش", role: "مدیریت مرکزی", status: "todo" },
+    { id: 144, week: 144, phase: 12, title: "اختتامیه نهایی – پایان برنامه ۱۴۴ هفته‌ای", details: "انتشار بیانیه مطبوعاتی رسمی مبنی بر رسیدن پروژه به هدف و تاکید بر ادامه پرقدرت مسیر برند.", category: "10- چشم‌انداز آینده و توسعه بازار", role: "رسانه‌ها", status: "todo" }
+];
+
+let campaignData = [];
+
+// DOM Elements
+const views = document.querySelectorAll('.view');
+const navLinks = document.querySelectorAll('.nav-link');
+const taskGrid = document.getElementById('task-grid');
+const timelineContainer = document.getElementById('timeline-container');
+const reportGrid = document.getElementById('report-grid');
+const taskModal = document.getElementById('task-modal');
+const modalBody = document.getElementById('modal-body');
+const modalClose = document.querySelector('.modal-close');
+
+// Filters
+const yearFilter = document.getElementById('year-filter');
+const monthFilter = document.getElementById('month-filter');
+const statusFilter = document.getElementById('status-filter');
+const searchInput = document.getElementById('search-input');
+const addTaskBtn = document.getElementById('add-task-btn');
+
+const monthNames = ["فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"];
+
+// --- Functions ---
+
+function init() {
+    loadData();
+    setupEventListeners();
+    populateMonthFilter();
+    renderAll();
+}
+
+function loadData() {
+    const savedData = localStorage.getItem('campaignData');
+    if (savedData) {
+        campaignData = JSON.parse(savedData);
+    } else {
+        campaignData = JSON.parse(JSON.stringify(initialCampaignData));
+    }
+}
+
+function saveData() {
+    localStorage.setItem('campaignData', JSON.stringify(campaignData));
+}
+
+function setupEventListeners() {
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const viewId = link.getAttribute('data-view');
+            switchView(viewId);
+            navLinks.forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === taskModal) {
+            closeModal();
+        }
+    });
+
+    yearFilter.addEventListener('change', renderToDoList);
+    monthFilter.addEventListener('change', renderToDoList);
+    statusFilter.addEventListener('change', renderToDoList);
+    searchInput.addEventListener('input', renderToDoList);
+    addTaskBtn.addEventListener('click', () => openTaskModal());
+}
+
+function renderAll() {
+    renderToDoList();
+    renderTimeline();
+    renderReports();
+}
+
+function switchView(viewId) {
+    views.forEach(view => {
+        view.classList.remove('active');
+        if (view.id === `${viewId}-view`) {
+            view.classList.add('active');
+        }
+    });
+}
+
+function populateMonthFilter() {
+    monthNames.forEach((name, index) => {
+        const option = document.createElement('option');
+        option.value = index + 1;
+        option.textContent = name;
+        monthFilter.appendChild(option);
+    });
+}
+
+// --- To-Do List View ---
+function renderToDoList() {
+    taskGrid.innerHTML = '';
+    const filteredTasks = filterTasks();
+
+    if (filteredTasks.length === 0) {
+        taskGrid.innerHTML = '<p>هیچ تسکی با این فیلترها یافت نشد.</p>';
+        return;
+    }
+
+    filteredTasks.forEach(task => {
+        const card = document.createElement('div');
+        card.className = 'task-card glass';
+        card.dataset.taskId = task.id;
+        
+        let statusClass = 'todo';
+        if (task.status === 'inprogress') statusClass = 'inprogress';
+        if (task.status === 'done') statusClass = 'done';
+
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="week-badge">هفته ${task.week}</span>
+                <div class="task-status ${statusClass}" title="وضعیت: ${task.status}"></div>
+            </div>
+            <h4>${task.title}</h4>
+            <p class="details">${task.details}</p>
+        `;
+        card.addEventListener('click', () => openTaskModal(task.id));
+        taskGrid.appendChild(card);
+    });
+}
+
+function filterTasks() {
+    const year = yearFilter.value;
+    const month = monthFilter.value;
+    const status = statusFilter.value;
+    const searchTerm = searchInput.value.toLowerCase();
+
+    return campaignData.filter(task => {
+        const taskYear = Math.ceil(task.week / 52);
+        const taskMonth = Math.ceil((task.week % 52) / 4.34) || 12;
+
+        const yearMatch = year === 'all' || taskYear == year;
+        const monthMatch = month === 'all' || taskMonth == month;
+        const statusMatch = status === 'all' || task.status === status;
+        const searchMatch = task.title.toLowerCase().includes(searchTerm) || task.details.toLowerCase().includes(searchTerm);
+
+        return yearMatch && monthMatch && statusMatch && searchMatch;
+    });
+}
+
+
+// --- Timeline View ---
+function renderTimeline() {
+    timelineContainer.innerHTML = '';
+    const phases = [...new Set(campaignData.map(t => t.phase))];
+
+    phases.forEach(phaseNum => {
+        const phaseTasks = campaignData.filter(t => t.phase === phaseNum);
+        const startWeek = phaseTasks[0].week;
+        const endWeek = phaseTasks[phaseTasks.length - 1].week;
+
+        const timelineItem = document.createElement('div');
+        timelineItem.className = 'timeline-item';
+        
+        let phaseTitle = `فاز ${phaseNum} (هفته‌های ${startWeek}–${endWeek})`;
+        if(phaseNum === 1) phaseTitle += ' – آماده‌سازی و لانچ مقدماتی';
+        if(phaseNum === 2) phaseTitle += ' – ورود به بازار گسترده';
+        // ... add more titles if needed
+        
+        timelineItem.innerHTML = `
+            <div class="timeline-content glass">
+                <h3>${phaseTitle}</h3>
+                <ul>
+                    ${phaseTasks.map(task => `<li><strong>هفته ${task.week}:</strong> ${task.title}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+        timelineContainer.appendChild(timelineItem);
+    });
+}
+
+// --- Reports View ---
+function renderReports() {
+    reportGrid.innerHTML = '';
+    const phases = [...new Set(campaignData.map(t => t.phase))];
+    const analyses = getQuarterlyAnalyses();
+
+    phases.forEach(phaseNum => {
+        const phaseTasks = campaignData.filter(t => t.phase === phaseNum);
+        
+        const total = phaseTasks.length;
+        const done = phaseTasks.filter(t => t.status === 'done').length;
+        const inprogress = phaseTasks.filter(t => t.status === 'inprogress').length;
+        const todo = total - done - inprogress;
+
+        const reportCard = document.createElement('div');
+        reportCard.className = 'report-card glass';
+        
+        const startWeek = phaseTasks[0].week;
+        const endWeek = phaseTasks[phaseTasks.length - 1].week;
+        const quarter = Math.ceil(phaseNum / 1); // Each phase is a quarter
+        
+        reportCard.innerHTML = `
+            <h3>فاز ${phaseNum} / فصل ${quarter} (هفته‌های ${startWeek}–${endWeek})</h3>
+            <div class="report-content">
+                <div class="chart-container">
+                    <canvas id="chart-phase-${phaseNum}"></canvas>
+                </div>
+                <div class="report-analysis">
+                    <h4>تحلیل استراتژیک فصل:</h4>
+                    ${analyses[phaseNum - 1] || '<p>تحلیلی برای این فصل ارائه نشده است.</p>'}
+                </div>
+            </div>
+        `;
+        reportGrid.appendChild(reportCard);
+        
+        // Render Chart
+        new Chart(document.getElementById(`chart-phase-${phaseNum}`), {
+            type: 'doughnut',
+            data: {
+                labels: ['انجام شده', 'در حال انجام', 'انجام نشده'],
+                datasets: [{
+                    data: [done, inprogress, todo],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.7)',
+                        'rgba(255, 193, 7, 0.7)',
+                        'rgba(108, 117, 125, 0.7)'
+                    ],
+                    borderColor: [
+                        '#28a745',
+                        '#ffc107',
+                        '#6c757d'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                         labels: {
+                            font: {
+                                family: "'Vazirmatn', sans-serif"
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: `وضعیت تسک‌ها`,
+                         font: {
+                            family: "'Vazirmatn', sans-serif",
+                            size: 16
+                        }
+                    }
+                }
+            }
+        });
+    });
+}
+
+function getQuarterlyAnalyses() {
+    return [
+        // فاز 1
+        `<p><strong>تمرکز اصلی:</strong> پی‌ریزی و لانچ. این فصل حیاتی‌ترین مرحله برای شکل‌دهی به هویت برند بلوط است. تسک‌ها از طراحی هویت بصری تا راه‌اندازی کمپین اولیه «یک روز بدون چای» را پوشش می‌دهند. <strong>نکته کلیدی:</strong> موفقیت در این فاز، شتاب اولیه لازم برای فازهای بعدی را فراهم می‌کند. باید به بازخوردها از مرحله پایلوت (هفته ۱۲) دقت ویژه‌ای شود.</p>`,
+        // فاز 2
+        `<p><strong>تمرکز اصلی:</strong> گسترش و شبکه‌سازی. برند از پایلوت خارج شده و وارد بازارهای گسترده‌تر می‌شود. تسک‌ها حول محور بومی‌سازی کمپین‌ها، اجرای CSR و ایجاد زیرساخت‌های اولیه بازاریابی شبکه‌ای (داشبورد پایش، سیستم سود فروشگاه) می‌چرخند. <strong>تحلیل:</strong> این فاز، آزمونی برای مقیاس‌پذیری مدل کسب‌وکار است. موفقیت در جذب نمایندگان و فعال‌سازی مشتریان وفادار، بقای بلندمدت را تضمین می‌کند.</p>`,
+        // فاز 3
+        `<p><strong>تمرکز اصلی:</strong> تثبیت زیرساخت دیجیتال و وفاداری. با عرضه اپلیکیشن موبایل و راه‌اندازی باشگاه مشتریان چندسطحی، تمرکز از جذب صرف، به سمت حفظ و تعمیق رابطه با مشتریان تغییر می‌کند. <strong>تحلیل:</strong> این فاز با استفاده از ابزارهای دیجیتال، ارتباط مستقیم و پایدار با مصرف‌کننده را برقرار می‌کند و برند را از یک محصول صرف به یک جامعه تبدیل می‌کند.</p>`,
+        // فاز 4
+        `<p><strong>تمرکز اصلی:</strong> نوآوری در تعامل و فناوری. استفاده از ابزارهای خلاقانه مانند فیلتر AR و تبلیغات درون‌برنامه‌ای، برند را از رقبا متمایز می‌کند. عرضه نسخه محدود و برنامه‌ریزی برای صادرات، نشان از بلوغ و جاه‌طلبی برند دارد. <strong>تحلیل:</strong> در این مرحله، بلوط تلاش می‌کند تا در ذهن مخاطب به عنوان یک برند مدرن، پویا و پیشرو تثبیت شود.</p>`,
+        // فاز 5
+        `<p><strong>تمرکز اصلی:</strong> حفظ رشد و ارتقای وفاداری. با جا افتادن برند، تمرکز بر حفظ شتاب، عمق‌بخشی به وفاداری (طرح اشتراک، لیگ فروش) و تقویت وجه تمایز از طریق محتوای علمی و مستند برند است. <strong>تحلیل:</strong> این فاز دوران گذار از رشد انفجاری به رشد پایدار است. ابتکاراتی مانند همکاری با متخصصان تغذیه، اعتبار برند را به شدت افزایش می‌دهد.</p>`,
+        // فاز 6
+        `<p><strong>تمرکز اصلی:</strong> تکمیل پوشش بازار و تحکیم جایگاه. در این فاز، برند به تمام نقاط کشور نفوذ می‌کند و با اجرای کمپین‌های ملی و سمپلینگ گسترده، تلاش می‌کند تا به بخشی از سبک زندگی روزمره مردم تبدیل شود. <strong>تحلیل:</strong> پایلوت صادرات و ساخت موزیک برند، گام‌های نهایی برای تبدیل شدن به یک مگابرند ملی با چشم‌انداز جهانی است.</p>`,
+        // ... Analyses for other phases
+        `<p><strong>فاز 7 - استمرار نوآوری:</strong> برند با عرضه نسخه‌های محدود و تقویت برنامه‌های وفاداری، از روزمرگی جلوگیری می‌کند و هیجان را زنده نگه می‌دارد. همکاری‌های علمی و تحلیل داده‌ها، تصمیمات آینده را هوشمندانه‌تر می‌سازد.</p>`,
+        `<p><strong>فاز 8 - گذار به جنبش فرهنگی:</strong> بلوط از یک محصول فراتر رفته و با کمپین «جنبش سبک زندگی» و تأسیس صندوق خیریه، به یک فرهنگ تبدیل می‌شود. مستندسازی دانش و بین‌المللی‌سازی، برند را برای آینده‌ای پایدار آماده می‌کند.</p>`,
+        `<p><strong>فاز 9 - پایداری و انتقال:</strong> در این فاز، فعالیت‌ها تثبیت شده و به روال عادی کسب‌وکار منتقل می‌شوند. بهینه‌سازی زنجیره تامین و تعیین نقشه راه R&D، پایداری عملیاتی و نوآوری محصولی را در بلندمدت تضمین می‌کند.</p>`,
+        `<p><strong>فاز 10 - تکمیل و فرجام:</strong> این فاز به جمع‌بندی نهایی و اجرای آخرین ابتکارات برای ایجاد یک موج مثبت پایانی اختصاص دارد. تهیه مطالعه موردی و تدوین استراتژی ۳ ساله بعدی، مسیر آینده را روشن می‌سازد.</p>`,
+        `<p><strong>فاز 11 - استمرار و تحویل:</strong> نظارت بر استمرار اقدامات و جلوگیری از افت پس از تحویل به تیم‌های عملیاتی. کمپین‌های کوچک و هدفمند مانند «مهمان‌نوازی ایرانی» برند را در بافت زندگی روزمره مردم بیشتر وارد می‌کند.</p>`,
+        `<p><strong>فاز 12 - پایان برنامه و انتقال کامل:</strong> برنامه ۱۴۴ هفته‌ای رسماً خاتمه می‌یابد. تحویل کامل امور به تیم‌های اجرایی و اعلام عمومی پایان موفقیت‌آمیز پروژه، برند را با قدرت وارد فصل جدیدی از حیات خود می‌کند.</p>`
+    ];
+}
+
+
+// --- Modal Functions ---
+function openTaskModal(taskId) {
+    const task = taskId ? campaignData.find(t => t.id === taskId) : { id: Date.now(), week: '', phase: '', title: '', details: '', category: '', role: '', status: 'todo' };
+    const isNewTask = !taskId;
+
+    modalBody.innerHTML = `
+        <h3>${isNewTask ? 'افزودن تسک جدید' : 'ویرایش تسک: ' + task.title}</h3>
+        <input type="hidden" id="task-id" value="${task.id}">
+        
+        <label for="task-title">عنوان تسک:</label>
+        <input type="text" id="task-title" value="${task.title}">
+        
+        <label for="task-details">جزئیات کامل:</label>
+        <textarea id="task-details">${task.details}</textarea>
+        
+        <label for="task-week">هفته:</label>
+        <input type="number" id="task-week" value="${task.week}" min="1" max="144">
+        
+        <label for="task-phase">فاز:</label>
+        <input type="number" id="task-phase" value="${task.phase}" min="1" max="12">
+        
+        <label for="task-category">حوزه راهبردی:</label>
+        <input type="text" id="task-category" value="${task.category}">
+
+        <label for="task-role">نقش/حلقه:</label>
+        <input type="text" id="task-role" value="${task.role}">
+        
+        <label for="task-status-select">وضعیت:</label>
+        <select id="task-status-select">
+            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>انجام نشده</option>
+            <option value="inprogress" ${task.status === 'inprogress' ? 'selected' : ''}>در حال انجام</option>
+            <option value="done" ${task.status === 'done' ? 'selected' : ''}>انجام شده</option>
+        </select>
+
+        <div class="modal-actions">
+            ${isNewTask ? '' : '<button id="delete-task-btn" class="btn-danger">حذف</button>'}
+            <button id="save-task-btn" class="btn-primary">ذخیره تغییرات</button>
+        </div>
+        
+        <hr style="margin: 20px 0;">
+        
+        <h4><i class="fa-solid fa-brain"></i> دستیار هوش مصنوعی</h4>
+        <p>اگر در اجرای این تسک با چالشی روبرو هستید، از AI کمک بگیرید.</p>
+        <button id="ai-consult-btn" class="btn-ai"><i class="fa-solid fa-wand-magic-sparkles"></i>مشورت با AI</button>
+        <div id="ai-response" class="ai-response"></div>
+    `;
+
+    taskModal.classList.add('show');
+
+    document.getElementById('save-task-btn').addEventListener('click', () => saveTask(isNewTask));
+    if (!isNewTask) {
+        document.getElementById('delete-task-btn').addEventListener('click', () => deleteTask(task.id));
+        document.getElementById('ai-consult-btn').addEventListener('click', () => consultAI(task));
+    } else {
+         document.getElementById('ai-consult-btn').style.display = 'none';
+    }
+}
+
+function closeModal() {
+    taskModal.classList.remove('show');
+}
+
+function saveTask(isNewTask) {
+    const id = parseInt(document.getElementById('task-id').value);
+    const updatedTask = {
+        id: id,
+        title: document.getElementById('task-title').value,
+        details: document.getElementById('task-details').value,
+        week: parseInt(document.getElementById('task-week').value),
+        phase: parseInt(document.getElementById('task-phase').value),
+        category: document.getElementById('task-category').value,
+        role: document.getElementById('task-role').value,
+        status: document.getElementById('task-status-select').value
+    };
+
+    if (isNewTask) {
+        campaignData.push(updatedTask);
+    } else {
+        const index = campaignData.findIndex(t => t.id === id);
+        if (index > -1) {
+            campaignData[index] = updatedTask;
+        }
+    }
+    
+    saveData();
+    renderAll();
+    closeModal();
+}
+
+function deleteTask(taskId) {
+    if (confirm('آیا از حذف این تسک مطمئن هستید؟')) {
+        campaignData = campaignData.filter(t => t.id !== taskId);
+        saveData();
+        renderAll();
+        closeModal();
+    }
+}
+
+async function consultAI(task) {
+    const aiResponseDiv = document.getElementById('ai-response');
+    aiResponseDiv.innerHTML = '';
+    aiResponseDiv.classList.add('loading');
+    
+    const apiKey = "AIzaSyBS9Zsr72aXCElnl7oxILj7kc32fyW9cfk"; // Your provided API Key
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+
+    const prompt = `
+        من مدیر کمپین برند "بلوط" هستم و روی تسک زیر کار می‌کنم.
+        عنوان تسک: "${task.title}"
+        جزئیات تسک: "${task.details}"
+        
+        لطفاً به زبان فارسی، چند پیشنهاد خلاقانه و عملی برای اجرای بهتر این تسک ارائه بده. چالش‌های احتمالی را شناسایی کن و برای هر کدام یک راهکار پیشنهاد بده.
+    `;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                "contents": [{
+                    "parts": [{
+                        "text": prompt
+                    }]
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            // This will likely happen with a fake key
+            throw new Error(`API Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const aiText = data.candidates[0].content.parts[0].text;
+        aiResponseDiv.innerHTML = aiText.replace(/\n/g, '<br>');
+
+    } catch (error) {
+        console.error("AI Error:", error);
+        aiResponseDiv.innerHTML = `
+            <p><strong>خطا در ارتباط با دستیار AI.</strong></p>
+            <p>این خطا ممکن است به دلیل نامعتبر بودن API Key یا مشکلات شبکه باشد. لطفاً از معتبر بودن کلید <code>${apiKey}</code> اطمینان حاصل کنید.</p>
+            <p><strong>یک نمونه پاسخ شبیه‌سازی شده:</strong></p>
+            <p><strong>چالش احتمالی:</strong> عدم استقبال کاربران از کمپین.</p>
+            <p><strong>راهکار:</strong> برای شروع، با چند اینفلوئنسر کوچک و معتبر همکاری کنید تا یخ اولیه کمپین شکسته شود. همچنین، جایزه‌ای جذاب برای خلاقانه‌ترین محتوا در نظر بگیرید تا انگیزه مشارکت افزایش یابد.</p>
+        `;
+    } finally {
+        aiResponseDiv.classList.remove('loading');
+    }
+}
+
+// --- Initial Load ---
+init();
+	
+    });
+    </script>
+</body>
+</html>
