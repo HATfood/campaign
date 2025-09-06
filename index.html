@@ -1041,8 +1041,9 @@ async function consultAI(task) {
     aiResponseDiv.classList.add('loading');
     
     // Your API key
-    const apiKey = "AIzaSyBS9Zsr72aXCElnl7oxILj7kc32fyW9cfk"; 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    const apiKey = "AIzaSyBS9Zsr72aXCElnl7oxILj7kc32fyW9cfk"; // Your actual key
+    // CORRECTED MODEL NAME in the URL
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro-latest:generateContent?key=${apiKey}`;
 
     const prompt = `
         I am the campaign manager for the "Baloot" brand, working on the following task.
@@ -1067,17 +1068,18 @@ async function consultAI(task) {
             })
         });
 
-        // We need to read the response body to get the error details
         const data = await response.json();
 
         if (!response.ok) {
-            // Log the detailed error from Google's response
             console.error("API Error Response from Google:", data);
-            // Throw an error with the specific message from the API
             throw new Error(data.error?.message || `Request failed with status ${response.status}`);
         }
         
-        // Using an external library to convert Markdown to HTML for nice formatting
+        if (!data.candidates || data.candidates.length === 0) {
+            console.error("No candidates in response:", data);
+            throw new Error("The AI model did not return a valid response. This might be due to safety filters or an empty response.");
+        }
+
         const { marked } = await import('https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js');
         const aiText = data.candidates[0].content.parts[0].text;
         aiResponseDiv.innerHTML = marked(aiText);
@@ -1089,8 +1091,8 @@ async function consultAI(task) {
             <p><strong>Specific Error:</strong> ${error.message}</p>
             <p><strong>Troubleshooting:</strong></p>
             <ol>
-                <li><strong>Most Likely:</strong> Ensure the <strong>"Generative Language API"</strong> is ENABLED in your Google Cloud project. <a href="https://console.cloud.google.com/apis/library/generativelanguage.googleapis.com" target="_blank">Click here to check</a>.</li>
-                <li>Verify your API Key restrictions allow your GitHub domain (<code>hatfood.github.io/*</code>).</li>
+                <li>The error indicates an issue with the model name or API configuration. The code has been updated to use the latest model name. Please ensure you've pushed the latest changes.</li>
+                <li>Verify your API Key restrictions and that the "Generative Language API" is enabled.</li>
                 <li>Check the browser's Console (F12) for more technical details.</li>
             </ol>
         `;
